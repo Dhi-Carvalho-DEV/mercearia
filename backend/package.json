@@ -1,7 +1,7 @@
 {
   "name": "mercearia-avancada",
-  "version": "1.0.0",
-  "description": "Sistema de gestão de mercearia - versão avançada",
+  "version": "1.1.0",
+  "description": "Sistema de gestão de mercearia - versão avançada com autenticação",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -10,6 +10,8 @@
     "express": "^4.18.2",
     "sqlite3": "^5.1.6",
     "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.0",
+    "bcrypt": "^5.1.0",
     "exceljs": "^4.3.0",
     "pdfkit": "^0.13.0"
   }
