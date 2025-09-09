@@ -1,14 +1,16 @@
 {
-  "name": "mercearia-backend",
+  "name": "mercearia-avancada",
   "version": "1.0.0",
+  "description": "Sistema de gestão de mercearia - versão avançada",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "cors": "2.8.5",
-    "express": "5.1.0",
-    "sqlite3": "5.1.7",
-    "body-parser": "2.2.0"
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "exceljs": "^4.3.0",
+    "pdfkit": "^0.13.0"
   }
 }

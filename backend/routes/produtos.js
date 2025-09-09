@@ -1,53 +1,47 @@
 const express = require("express");
 const router = express.Router();
-const { db } = require("../database");
+const db = require("../database");
 
-function checkAuth(req, res, next) {
-  const h = req.headers["authorizaton"] || "";
-  if (h === "Bearer admin-token") return next();
-  return res.status(401).json({ error: "Não autorizado" });
-}
-
-router.use(checkAuth);
-
+// GET /api/produtos - listar todos
 router.get("/", (req, res) => {
-  db.all("SELECT * FROM produntos", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erro no Banco de Dados" });
+  db.all("SELECT * FROM produtos ORDER BY nome", [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 });
 
+// POST /api/produtos - criar
 router.post("/", (req, res) => {
   const { nome, categoria, preco, quantidade } = req.body;
+  if (!nome || preco == null || quantidade == null)
+    return res.status(400).json({ error: "Campos obrigatórios ausentes" });
   db.run(
     "INSERT INTO produtos (nome, categoria, preco, quantidade) VALUES (?, ?, ?, ?)",
-    [nome, categoria, preco, quantidade],
+    [nome, categoria || "", preco, quantidade],
     function (err) {
-      if (err)
-        return res.status(500).json({ error: "Erro ao inserir novo produto" });
-      res.json({ id: this.lastID });
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID, nome, categoria, preco, quantidade });
     }
   );
 });
 
+// PUT /api/produtos/:id - editar
 router.put("/:id", (req, res) => {
-  const { id } = req.params;
   const { nome, categoria, preco, quantidade } = req.body;
   db.run(
     "UPDATE produtos SET nome=?, categoria=?, preco=?, quantidade=? WHERE id=?",
-    [nome, categoria, preco, quantidade, id],
+    [nome, categoria, preco, quantidade, req.params.id],
     function (err) {
-      if (err)
-        return res.status(500).json({ error: "Erro ao atualizar produto" });
+      if (err) return res.status(500).json({ error: err.message });
       res.json({ changes: this.changes });
     }
   );
 });
 
+// DELETE /api/produtos/:id - excluir
 router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-  db.run("DELETE FROM produtos WHERE id=?", [id], function (err) {
-    if (err) return res.status(500).json({ error: "Erro ao deletar produto" });
+  db.run("DELETE FROM produtos WHERE id=?", [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
     res.json({ deleted: this.changes });
   });
 });

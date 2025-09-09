@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login - Mercearia</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="login-card">
+      <h2>Login</h2>
+      <input id="username" placeholder="Usuário (admin)" />
+      <input id="senha" type="password" placeholder="Senha (admin)" />
+      <button id="btnLogin">Entrar</button>
+      <p id="msg" style="color: red"></p>
+    </div>
+    <script>
+      /* Login simples (verifica tabelas - mas não bloqueia o frontend neste exemplo) */
+      document
+        .getElementById("btnLogin")
+        .addEventListener("click", async () => {
+          const u = document.getElementById("username").value;
+          const s = document.getElementById("senha").value;
+          // Login local simples: aceitamos qualquer (ou admin/admin)
+          if (!u || !s) {
+            document.getElementById("msg").innerText =
+              "Preencha usuário e senha";
+            return;
+          }
+          // Salva flag local para permitir navegar
+          localStorage.setItem("mercearia_logged", "1");
+          window.location = "dashboard.html";
+        });
+    </script>
+  </body>
+</html>

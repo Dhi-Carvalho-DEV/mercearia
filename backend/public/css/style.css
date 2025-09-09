@@ -1,0 +1,154 @@
+/* base */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  color: #222;
+}
+.topbar {
+  background: #333;
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topbar a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+.container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* cards e menu */
+.menu-links {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.card {
+  display: inline-block;
+  padding: 20px;
+  background: #fff;
+  margin: 0;
+  text-align: center;
+  text-decoration: none;
+  color: #222;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  width: 180px;
+}
+
+/* formulários */
+.form-group {
+  margin-bottom: 12px;
+}
+input,
+select,
+button {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+button {
+  background: #28a745;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background: #218838;
+}
+
+/* tabelas */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  margin-top: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+th,
+td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+thead {
+  background: #f4f4f4;
+  font-weight: bold;
+}
+
+/* relatórios - botões */
+.relatorios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.relatorios a {
+  display: inline-block;
+  padding: 12px;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-weight: bold;
+}
+.btn-pdf {
+  background: #e74c3c;
+}
+.btn-pdf:hover {
+  background: #c0392b;
+}
+.btn-excel {
+  background: #27ae60;
+}
+.btn-excel:hover {
+  background: #1e8449;
+}
+
+/* estoque warnings */
+.low-stock {
+  background: #fff3cd !important;
+  color: #856404 !important;
+}
+.out-of-stock {
+  background: #f8d7da !important;
+  color: #721c24 !important;
+}
+
+/* login */
+.login-card {
+  max-width: 360px;
+  margin: 60px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.login-card input,
+.login-card button {
+  margin: 8px 0;
+}
+
+/* responsivo */
+@media (max-width: 600px) {
+  .menu-links {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .card {
+    width: 100%;
+  }
+}

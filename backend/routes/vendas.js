@@ -1,48 +1,46 @@
 const express = require("express");
 const router = express.Router();
-const { db } = require("../database");
+const db = require("../database");
 
-function checkAuth(req, res, next) {
-  const h = req.headers["authorization"] || "";
-  if (h === "Bearer admin-token") return next();
-  return res.status(401).json({ error: "Não autorizado" });
-}
-
-router.use(checkAuth);
-
-// Registrar venda
+// POST /api/vendas - registrar venda e decrementar estoque
 router.post("/", (req, res) => {
-  const { cliente_id, tipo_pagamento, itens } = req.body; // itens = [{produto_id, quantidade, preco_unitario}, ...]
-  const total = itens.reduce((s, i) => s + i.quantidade * i.preco_unitario, 0);
-  const data = new Date().toISOString();
+  const { itens, tipo, cliente, total } = req.body;
+  if (!Array.isArray(itens) || itens.length === 0)
+    return res.status(400).json({ error: "Itens inválidos" });
 
   db.run(
-    "INSERT INTO vendas (cliente_id, tipo_pagamento, total, data) VALUES (?, ?, ?, ?)",
-    [cliente_id || null, tipo_pagamento, total, data],
+    'INSERT INTO vendas (cliente_id, tipo_pagamento, total, data) VALUES (?, ?, ?, datetime("now"))',
+    [cliente || null, tipo || "dinheiro", total || 0],
     function (err) {
-      if (err) return res.status(500).json({ error: "Erro ao inserir venda" });
-      const vendaId = this.lastID;
+      if (err) return res.status(500).json({ error: err.message });
 
+      const vendaId = this.lastID;
       const stmt = db.prepare(
-        "INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario) VALUES (?, ?, ?, ?)"
+        "INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?)"
       );
-      itens.forEach((i) => {
-        stmt.run(vendaId, i.produto_id, i.quantidade, i.preco_unitario);
-        // decrementar estoque
+
+      itens.forEach((item) => {
+        stmt.run([vendaId, item.id, item.quantidade, item.preco]);
+
+        // Decrementar estoque (não verifica negativo aqui — poderia acrescentar validação)
         db.run("UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?", [
-          i.quantidade,
-          i.produto_id,
+          item.quantidade,
+          item.id,
         ]);
       });
-      stmt.finalize(() => res.json({ id: vendaId }));
+
+      stmt.finalize((err2) => {
+        if (err2) return res.status(500).json({ error: err2.message });
+        res.json({ ok: true, vendaId });
+      });
     }
   );
 });
 
-// Listar vendas simples
+// GET /api/vendas - listar vendas simples
 router.get("/", (req, res) => {
   db.all("SELECT * FROM vendas ORDER BY data DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Erro no DB" });
+    if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 });

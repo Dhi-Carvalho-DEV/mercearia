@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard - Mercearia</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <nav class="topbar">
+      <h1>Dashboard</h1>
+      <a href="index.html" onclick="localStorage.removeItem('mercearia_logged')"
+        >Sair</a
+      >
+    </nav>
+
+    <main class="container">
+      <h2>Menu Principal</h2>
+      <div class="menu-links">
+        <a class="card" href="produtos.html">📦 Produtos</a>
+        <a class="card" href="clientes.html">👤 Clientes</a>
+        <a class="card" href="vendas.html">💰 Vendas</a>
+      </div>
+
+      <h2>Relatórios</h2>
+      <div class="relatorios">
+        <a class="btn-pdf" href="/api/relatorios/vendas/pdf" target="_blank"
+          >📄 Vendas (PDF)</a
+        >
+        <a class="btn-excel" href="/api/relatorios/vendas/excel" target="_blank"
+          >📊 Vendas (Excel)</a
+        >
+        <a class="btn-pdf" href="/api/relatorios/clientes/pdf" target="_blank"
+          >📄 Clientes (PDF)</a
+        >
+        <a
+          class="btn-excel"
+          href="/api/relatorios/clientes/excel"
+          target="_blank"
+          >📊 Clientes (Excel)</a
+        >
+        <a class="btn-pdf" href="/api/relatorios/estoque/pdf" target="_blank"
+          >📄 Estoque (PDF)</a
+        >
+        <a
+          class="btn-excel"
+          href="/api/relatorios/estoque/excel"
+          target="_blank"
+          >📊 Estoque (Excel)</a
+        >
+      </div>
+    </main>
+  </body>
+</html>

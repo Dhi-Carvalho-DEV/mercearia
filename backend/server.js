@@ -1,18 +1,28 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 const cors = require("cors");
-const { init } = require("./database");
+const path = require("path");
 
 const app = express();
+const PORT = 3000;
+
+// Middlewares
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-init();
+// Servir frontend estático (public)
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/api/auth", require("./routes/auth"));
+// Rotas API
 app.use("/api/produtos", require("./routes/produtos"));
 app.use("/api/clientes", require("./routes/clientes"));
 app.use("/api/vendas", require("./routes/vendas"));
+app.use("/api/relatorios", require("./routes/relatorios"));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+// Fallback: se quiser servir index diretamente na raiz
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
