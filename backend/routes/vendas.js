@@ -1,48 +1,56 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../database");
+const auth = require("../middleware/authMiddleware");
 
-// POST /api/vendas - registrar venda e decrementar estoque
-router.post("/", (req, res) => {
-  const { itens, tipo, cliente, total } = req.body;
-  if (!Array.isArray(itens) || itens.length === 0)
-    return res.status(400).json({ error: "Itens inválidos" });
-
-  db.run(
-    'INSERT INTO vendas (cliente_id, tipo_pagamento, total, data) VALUES (?, ?, ?, datetime("now"))',
-    [cliente || null, tipo || "dinheiro", total || 0],
-    function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-
-      const vendaId = this.lastID;
-      const stmt = db.prepare(
-        "INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?)"
-      );
-
-      itens.forEach((item) => {
-        stmt.run([vendaId, item.id, item.quantidade, item.preco]);
-
-        // Decrementar estoque (não verifica negativo aqui — poderia acrescentar validação)
-        db.run("UPDATE produtos SET quantidade = quantidade - ? WHERE id = ?", [
-          item.quantidade,
-          item.id,
-        ]);
-      });
-
-      stmt.finalize((err2) => {
-        if (err2) return res.status(500).json({ error: err2.message });
-        res.json({ ok: true, vendaId });
-      });
-    }
-  );
-});
-
-// GET /api/vendas - listar vendas simples
-router.get("/", (req, res) => {
-  db.all("SELECT * FROM vendas ORDER BY data DESC", [], (err, rows) => {
+// GET /api/vendas
+router.get("/", auth, (req, res) => {
+  const sql = `
+    SELECT v.id, v.cliente_id, c.nome AS cliente, v.tipo_pagamento, v.total, v.data
+    FROM vendas v
+    LEFT JOIN clientes c ON v.cliente_id = c.id
+    ORDER BY v.data DESC
+  `;
+  db.all(sql, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
+});
+
+// POST /api/vendas
+router.post("/", auth, (req, res) => {
+  const { cliente_id, tipo_pagamento, itens, total } = req.body;
+  if (!itens || !Array.isArray(itens) || itens.length === 0)
+    return res.status(400).json({ error: "Itens da venda obrigatórios" });
+  if (total <= 0) return res.status(400).json({ error: "Total inválido" });
+
+  const data = new Date().toISOString();
+  db.run(
+    "INSERT INTO vendas (cliente_id, tipo_pagamento, total, data) VALUES (?, ?, ?, ?)",
+    [cliente_id || null, tipo_pagamento || "DINHEIRO", total, data],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      const venda_id = this.lastID;
+
+      // Inserir itens da venda e decrementar estoque
+      const stmt = db.prepare(
+        "INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?)"
+      );
+      itens.forEach((item) => {
+        if (item.quantidade <= 0) return;
+        stmt.run(venda_id, item.produto_id, item.quantidade, item.preco);
+
+        // Decrementa quantidade de produto
+        db.run("UPDATE produtos SET quantidade = quantidade - ? WHERE id=?", [
+          item.quantidade,
+          item.produto_id,
+        ]);
+      });
+      stmt.finalize();
+
+      res.json({ venda_id });
+    }
+  );
 });
 
 module.exports = router;
