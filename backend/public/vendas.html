@@ -1,73 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vendas - Mercearia</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <nav class="topbar">
-      <h1>Registrar Venda</h1>
-      <a href="dashboard.html">Voltar</a>
-    </nav>
+    <header>
+      <h1>Vendas</h1>
+      <button onclick="window.location.href='dashboard.html'">Voltar</button>
+    </header>
 
-    <main class="container">
-      <h2>Nova Venda</h2>
+    <main>
+      <form id="vendaForm">
+        <label>Cliente:</label>
+        <select id="clienteSelect"></select>
 
-      <div class="form-group">
-        <label>Produto</label>
-        <select id="produto"></select>
-      </div>
-
-      <div class="form-group">
-        <label>Quantidade</label>
-        <input id="quantidade" type="number" min="1" placeholder="Quantidade" />
-      </div>
-
-      <button id="btnAddProduto">Adicionar Produto</button>
-
-      <h3>Itens</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Qtd</th>
-            <th>Preço</th>
-          </tr>
-        </thead>
-        <tbody id="itens"></tbody>
-      </table>
-
-      <p><strong>Total:</strong> R$ <span id="total">0.00</span></p>
-
-      <div class="form-group">
-        <label>Valor Recebido</label>
-        <input
-          id="valorRecebido"
-          type="number"
-          step="0.01"
-          placeholder="Valor recebido"
-        />
-      </div>
-
-      <p><strong>Troco:</strong> R$ <span id="troco">0.00</span></p>
-
-      <div class="form-group">
-        <label>Tipo de Pagamento</label>
-        <select id="tipo">
-          <option value="dinheiro">Dinheiro</option>
-          <option value="cartao">Cartão</option>
-          <option value="fiado">Fiado</option>
+        <label>Tipo de Pagamento:</label>
+        <select id="tipoPagamento">
+          <option>DINHEIRO</option>
+          <option>CARTÃO</option>
         </select>
-      </div>
 
-      <div class="form-group">
-        <label>Cliente (opcional)</label>
-        <select id="cliente"></select>
-      </div>
+        <h2>Itens</h2>
+        <div id="itensContainer"></div>
+        <button type="button" id="addItemBtn">Adicionar Item</button>
 
-      <button id="btnFinalizar">Finalizar Venda</button>
+        <label>Total:</label>
+        <input type="number" id="total" readonly />
+
+        <label>Valor Recebido:</label>
+        <input type="number" id="valorRecebido" />
+
+        <label>Troco:</label>
+        <input type="number" id="troco" readonly />
+
+        <button type="submit">Finalizar Venda</button>
+        <p id="errorMsg" class="error"></p>
+      </form>
     </main>
 
     <script src="js/vendas.js"></script>

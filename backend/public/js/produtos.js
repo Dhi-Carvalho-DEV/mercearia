@@ -1,99 +1,82 @@
-// produtos.js - gerencia produtos (list, add, edit, delete)
-const API = "/api";
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "index.html";
 
-const nomeInput = document.getElementById("nome");
-const categoriaInput = document.getElementById("categoria");
-const precoInput = document.getElementById("preco");
-const quantidadeInput = document.getElementById("quantidade");
-const btnAddProduto = document.getElementById("btnAddProduto");
-const listaProdutos = document.getElementById("listaProdutos");
+const produtoForm = document.getElementById("produtoForm");
+const errorMsg = document.getElementById("errorMsg");
+const produtosTable = document.querySelector("#produtosTable tbody");
+
+let editId = null;
 
 async function carregarProdutos() {
-  try {
-    const res = await fetch(API + "/produtos");
-    const produtos = await res.json();
-    listaProdutos.innerHTML = produtos
-      .map(
-        (p) => `
-      <tr>
-        <td>${p.nome}</td>
-        <td>${p.categoria || ""}</td>
-        <td>R$ ${Number(p.preco).toFixed(2)}</td>
-        <td>${p.quantidade}</td>
-        <td>
-          <button onclick="editarProduto(${p.id})">Editar</button>
-          <button onclick="deletarProduto(${p.id})">Excluir</button>
-        </td>
-      </tr>
-    `
-      )
-      .join("");
-  } catch (err) {
-    console.error("Erro ao carregar produtos:", err);
-  }
+  const res = await fetch("/api/produtos", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const produtos = await res.json();
+  produtosTable.innerHTML = "";
+  produtos.forEach((p) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${p.id}</td>
+      <td>${p.nome}</td>
+      <td>${p.categoria}</td>
+      <td>${p.preco.toFixed(2)}</td>
+      <td>${p.quantidade}</td>
+      <td>
+        <button onclick="editarProduto(${p.id}, '${p.nome}', '${
+      p.categoria
+    }', ${p.preco}, ${p.quantidade})">Editar</button>
+        <button onclick="deletarProduto(${p.id})">Excluir</button>
+      </td>
+    `;
+    produtosTable.appendChild(tr);
+  });
 }
 
-btnAddProduto.addEventListener("click", async () => {
-  const nome = nomeInput.value.trim();
-  const categoria = categoriaInput.value.trim();
-  const preco = parseFloat(precoInput.value);
-  const quantidade = parseInt(quantidadeInput.value);
+function editarProduto(id, nome, categoria, preco, quantidade) {
+  document.getElementById("produtoId").value = id;
+  document.getElementById("nome").value = nome;
+  document.getElementById("categoria").value = categoria;
+  document.getElementById("preco").value = preco;
+  document.getElementById("quantidade").value = quantidade;
+  editId = id;
+}
 
-  if (!nome || isNaN(preco) || isNaN(quantidade))
-    return alert("Preencha os campos corretamente");
+async function deletarProduto(id) {
+  if (!confirm("Deseja realmente excluir?")) return;
+  await fetch(`/api/produtos/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  carregarProdutos();
+}
 
-  try {
-    await fetch(API + "/produtos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, categoria, preco, quantidade }),
-    });
-    nomeInput.value =
-      categoriaInput.value =
-      precoInput.value =
-      quantidadeInput.value =
-        "";
+produtoForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const nome = document.getElementById("nome").value;
+  const categoria = document.getElementById("categoria").value;
+  const preco = parseFloat(document.getElementById("preco").value);
+  const quantidade = parseInt(document.getElementById("quantidade").value);
+
+  const body = { nome, categoria, preco, quantidade };
+  const url = editId ? `/api/produtos/${editId}` : "/api/produtos";
+  const method = editId ? "PUT" : "POST";
+
+  const res = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (res.ok) {
+    produtoForm.reset();
+    editId = null;
     carregarProdutos();
-  } catch (err) {
-    console.error("Erro ao adicionar produto:", err);
+  } else {
+    errorMsg.textContent = data.error;
   }
 });
-
-window.editarProduto = async function (id) {
-  try {
-    const res = await fetch(API + "/produtos");
-    const produtos = await res.json();
-    const p = produtos.find((x) => x.id === id);
-    if (!p) return alert("Produto não encontrado");
-    const novoNome = prompt("Nome:", p.nome);
-    if (novoNome === null) return;
-    const novaCat = prompt("Categoria:", p.categoria || "");
-    const novoPreco = prompt("Preço:", p.preco);
-    const novaQtd = prompt("Quantidade:", p.quantidade);
-    await fetch(API + "/produtos/" + id, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nome: novoNome,
-        categoria: novaCat,
-        preco: parseFloat(novoPreco),
-        quantidade: parseInt(novaQtd),
-      }),
-    });
-    carregarProdutos();
-  } catch (err) {
-    console.error("Erro ao editar produto:", err);
-  }
-};
-
-window.deletarProduto = async function (id) {
-  if (!confirm("Excluir produto?")) return;
-  try {
-    await fetch(API + "/produtos/" + id, { method: "DELETE" });
-    carregarProdutos();
-  } catch (err) {
-    console.error("Erro ao deletar produto:", err);
-  }
-};
 
 carregarProdutos();

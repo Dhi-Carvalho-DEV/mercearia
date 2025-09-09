@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios - Mercearia</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Relatórios</h1>
+      <button onclick="window.location.href='dashboard.html'">Voltar</button>
+    </header>
+
+    <main>
+      <div class="cards-container">
+        <div class="card" onclick="baixarRelatorio('vendas')">Vendas</div>
+        <div class="card" onclick="baixarRelatorio('clientes')">Clientes</div>
+        <div class="card" onclick="baixarRelatorio('estoque')">Estoque</div>
+      </div>
+    </main>
+
+    <script>
+      const token = localStorage.getItem("token");
+      if (!token) window.location.href = "index.html";
+
+      function baixarRelatorio(tipo) {
+        window.open(`/api/relatorios/${tipo}`, "_blank");
+      }
+    </script>
+  </body>
+</html>

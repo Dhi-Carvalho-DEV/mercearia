@@ -1,37 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Clientes - Mercearia</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <nav class="topbar">
+    <header>
       <h1>Clientes</h1>
-      <a href="dashboard.html">Voltar</a>
-    </nav>
+      <button onclick="window.location.href='dashboard.html'">Voltar</button>
+    </header>
 
-    <main class="container">
-      <h2>Novo Cliente</h2>
-      <div class="form-group">
-        <input id="nome" placeholder="Nome do cliente" />
-      </div>
-      <div class="form-group">
-        <input id="telefone" placeholder="Telefone" />
-      </div>
-      <button id="btnAddCliente">Salvar Cliente</button>
+    <main>
+      <form id="clienteForm">
+        <input type="hidden" id="clienteId" />
+        <label>Nome:</label>
+        <input type="text" id="nome" required />
+        <label>Telefone:</label>
+        <input type="text" id="telefone" />
+        <button type="submit">Salvar</button>
+        <p id="errorMsg" class="error"></p>
+      </form>
 
       <h2>Lista de Clientes</h2>
-      <table>
+      <table id="clientesTable" border="1" cellspacing="0" cellpadding="5">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Nome</th>
             <th>Telefone</th>
             <th>Ações</th>
           </tr>
         </thead>
-        <tbody id="listaClientes"></tbody>
+        <tbody></tbody>
       </table>
     </main>
 

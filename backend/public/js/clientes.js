@@ -1,79 +1,75 @@
-// clientes.js - gerencia clientes
-const API = "/api";
+const clienteForm = document.getElementById("clienteForm");
+const clientesTable = document.querySelector("#clientesTable tbody");
+const errorMsgCliente = document.getElementById("errorMsg");
 
-const nomeCli = document.getElementById("nome");
-const telefoneCli = document.getElementById("telefone");
-const btnAddCliente = document.getElementById("btnAddCliente");
-const listaClientes = document.getElementById("listaClientes");
+let editClienteId = null;
 
 async function carregarClientes() {
-  try {
-    const res = await fetch(API + "/clientes");
-    const clientes = await res.json();
-    listaClientes.innerHTML = clientes
-      .map(
-        (c) => `
-      <tr>
-        <td>${c.nome}</td>
-        <td>${c.telefone || ""}</td>
-        <td>
-          <button onclick="editarCliente(${c.id})">Editar</button>
-          <button onclick="deletarCliente(${c.id})">Excluir</button>
-        </td>
-      </tr>
-    `
-      )
-      .join("");
-  } catch (err) {
-    console.error("Erro ao carregar clientes:", err);
-  }
+  const res = await fetch("/api/clientes", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const clientes = await res.json();
+  clientesTable.innerHTML = "";
+  clientes.forEach((c) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.id}</td>
+      <td>${c.nome}</td>
+      <td>${c.telefone || ""}</td>
+      <td>
+        <button onclick="editarCliente(${c.id}, '${c.nome}', '${
+      c.telefone || ""
+    }')">Editar</button>
+        <button onclick="deletarCliente(${c.id})">Excluir</button>
+      </td>
+    `;
+    clientesTable.appendChild(tr);
+  });
 }
 
-btnAddCliente.addEventListener("click", async () => {
-  const nome = nomeCli.value.trim();
-  const telefone = telefoneCli.value.trim();
-  if (!nome) return alert("Nome é obrigatório");
-  try {
-    await fetch(API + "/clientes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome, telefone }),
-    });
-    nomeCli.value = telefoneCli.value = "";
+function editarCliente(id, nome, telefone) {
+  document.getElementById("clienteId").value = id;
+  document.getElementById("nome").value = nome;
+  document.getElementById("telefone").value = telefone;
+  editClienteId = id;
+}
+
+async function deletarCliente(id) {
+  if (!confirm("Deseja realmente excluir?")) return;
+  await fetch(`/api/clientes/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  carregarClientes();
+}
+
+clienteForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const nome = document.getElementById("nome").value;
+  const telefone = document.getElementById("telefone").value;
+
+  const body = { nome, telefone };
+  const url = editClienteId
+    ? `/api/clientes/${editClienteId}`
+    : "/api/clientes";
+  const method = editClienteId ? "PUT" : "POST";
+
+  const res = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (res.ok) {
+    clienteForm.reset();
+    editClienteId = null;
     carregarClientes();
-  } catch (err) {
-    console.error("Erro ao adicionar cliente:", err);
+  } else {
+    errorMsgCliente.textContent = data.error;
   }
 });
-
-window.editarCliente = async function (id) {
-  try {
-    const res = await fetch(API + "/clientes");
-    const clientes = await res.json();
-    const c = clientes.find((x) => x.id === id);
-    if (!c) return alert("Cliente não encontrado");
-    const novoNome = prompt("Nome:", c.nome);
-    if (novoNome === null) return;
-    const novoTel = prompt("Telefone:", c.telefone || "");
-    await fetch(API + "/clientes/" + id, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: novoNome, telefone: novoTel }),
-    });
-    carregarClientes();
-  } catch (err) {
-    console.error("Erro ao editar cliente:", err);
-  }
-};
-
-window.deletarCliente = async function (id) {
-  if (!confirm("Excluir cliente?")) return;
-  try {
-    await fetch(API + "/clientes/" + id, { method: "DELETE" });
-    carregarClientes();
-  } catch (err) {
-    console.error("Erro ao deletar cliente:", err);
-  }
-};
 
 carregarClientes();
